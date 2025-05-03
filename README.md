@@ -1,6 +1,6 @@
 # Example application
 
-This is a Composable example application for the [main branch](https://github.com/Accenture/mercury-nodejs)
+This is a Composable example application for the [Composable Node.js project](https://github.com/Accenture/mercury-nodejs)
 
 ## Developer Guide
 

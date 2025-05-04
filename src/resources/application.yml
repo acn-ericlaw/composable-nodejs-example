@@ -2,7 +2,7 @@
 
 application.name: 'composable-example'
 info.app:
-  version: '4.2.37'
+  version: '4.2.38'
   description: 'Composable application example'
 #
 # server port for Event API REST endpoint
@@ -64,3 +64,11 @@ yaml.flow.automation: classpath:/flows.yaml
 #
 show.env.variables: 'PATH'
 show.application.properties: 'log.format'
+
+#
+# You can put a list of main modules here and the system will invoke
+# these composable functions when the ComposableLoader initializes
+# the system
+#
+modules.autostart:
+  - 'main.app'

@@ -3,10 +3,11 @@
  */
 import fs from 'fs';
 import { fileURLToPath } from "url";
-import { Logger, AppConfig, Platform, RestAutomation, EventScriptEngine } from 'mercury-composable';
+import { Logger, AppConfig, Platform, PostOffice, RestAutomation, EventScriptEngine, EventEnvelope } from 'mercury-composable';
 // import composable functions
 import { NoOp } from '../../node_modules/mercury-composable/dist/services/no-op.js';
 import { ResilienceHandler } from '../../node_modules/mercury-composable/dist/services/resilience-handler.js';
+import { MainApp } from '../autostart/main-application.js';
 import { DemoAuth } from '../services/demo-auth.js';
 import { DemoHealthCheck } from '../services/health-check.js';
 import { HelloConcurrent } from '../services/hello-concurrent.js';
@@ -32,7 +33,7 @@ function getRootFolder() {
 export class ComposableLoader {
     private static loaded = false;
 
-    static initialize(): void {
+    static async initialize() {
         // execute only once
         if (!ComposableLoader.loaded) {
             ComposableLoader.loaded = true;
@@ -51,6 +52,7 @@ export class ComposableLoader {
                 const platform = Platform.getInstance();
                 platform.register('no.op', new NoOp(), 50);
                 platform.register('resilience.handler', new ResilienceHandler(), 100, true, true);
+                platform.register('main.app', new MainApp());
                 platform.register('v1.api.auth', new DemoAuth());
                 platform.register('demo.health', new DemoHealthCheck());
                 platform.register(HelloConcurrent.routeName, new HelloConcurrent(), 10);
@@ -64,12 +66,28 @@ export class ComposableLoader {
                 platform.register('v1.save.profile', new SaveProfile(), 10);
                 // start Event Script system
                 const eventManager = new EventScriptEngine();
-                eventManager.start();
+                await eventManager.start();
                 // start REST automation system
                 if ('true' == config.getProperty('rest.automation')) {
                     const server = RestAutomation.getInstance();
-                    server.start();
+                    await server.start();
                 }
+                const mainApps = config.get('modules.autostart');
+                if (Array.isArray(mainApps)) {
+                    const po = new PostOffice();
+                    for (let i=0; i < mainApps.length; i++) {
+                        const svc = config.getProperty(`modules.autostart[${i}]`);
+                        if (svc && po.exists(svc)) {
+                            log.info(`Starting module '${svc}'`);
+                            po.send(new EventEnvelope().setTo(svc).setHeader('type', 'start'));
+                        } else {
+                            log.error(`Unable to start module '${svc}' because it does not exist`);
+                        }
+                    }
+                } 
+                // keep the server running
+                platform.runForever();
+                await platform.getReady();               
             } catch (e) {
                 log.error(`Unable to preload - ${e.message}`);
             }

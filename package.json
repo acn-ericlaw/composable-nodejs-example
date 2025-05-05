@@ -8,6 +8,9 @@
   },
   "author": "Eric Law <eric.law@accenture.com>",
   "license": "Apache-2.0",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "clean": "node clean.js && node placeholder.js",
     "pull": "npm uninstall mercury-composable && npm install https://github.com/Accenture/mercury-nodejs",

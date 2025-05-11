@@ -1,24 +1,14 @@
 import { Logger, Utility, Platform, PostOffice, Sender, EventEnvelope, AppException, 
     AsyncHttpRequest, ObjectStreamReader, ObjectStreamIO, ObjectStreamWriter, 
     AppConfig} from 'mercury-composable';
-import { fileURLToPath } from "url";
 import { ComposableLoader } from '../src/preload/preload';
 
 const log = Logger.getInstance();
 const util = new Utility();
-let platform: Platform;
 
 const HELLO_WORLD = 'hello.world'
 const TEST_MESSAGE = 'test message';
 const STREAM_CONTENT = 'x-stream-id';
-
-function getRootFolder() {
-    const folder = fileURLToPath(new URL("..", import.meta.url));
-    // for windows OS, convert backslash to regular slash and drop drive letter from path
-    const path = folder.includes('\\')? folder.replaceAll('\\', '/') : folder;
-    const colon = path.indexOf(':');
-    return colon == 1? path.substring(colon+1) : path;
-}
 
 /**
  * These are unit tests for each user functions
@@ -26,24 +16,15 @@ function getRootFolder() {
 describe('Service tests', () => {
 
     beforeAll(async () => {
-        const resourcePath = getRootFolder() + 'src/resources';
-        // AppConfig should be initialized with base configuration parameter before everything else
-        const appConfig = AppConfig.getInstance(resourcePath);
-        // You can programmatically change a configuration parameter.
-        // This emulates Java's System.setProperty behavior.
-        appConfig.set('server.port', 8303);
-        const port = appConfig.getProperty("server.port");
-        // print out the port number to confirm that it is using a different one.
+        await ComposableLoader.initialize(8304, true);
+        const config = AppConfig.getInstance();
+        const port = config.getProperty("server.port");
         const baseUrl = `http://127.0.0.1:${port}`;
-        log.info(`Service tests will use ${baseUrl}`);         
-        ComposableLoader.initialize();
-        platform = Platform.getInstance();
-        platform.runForever();
-        await platform.getReady();
+        log.info(`Service tests will use ${baseUrl}`);
     });
 
     afterAll(async () => {
-        await platform.stop();
+        await Platform.getInstance().stop();
         // give console.log a moment to finish
         await util.sleep(2000);
         log.info("Service tests completed");

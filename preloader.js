@@ -159,16 +159,12 @@ async function main() {
             }
         }            
     }  
-    if (Object.keys(clsMap).length > 0) {
-        const loader = new TemplateLoader();
-        const template = loader.getTemplate('preload.template');
-        if (template && template.includes(IMPORT_TAG) && template.includes(SERVICE_TAG)) {
-            await generatePreLoader(src, template.split('\n'));
-        } else {
-            throw new Error(`Invalid preload.template - missing ${IMPORT_TAG} and ${SERVICE_TAG} tags`);
-        }
+    const loader = new TemplateLoader();
+    const template = loader.getTemplate('preload.template');
+    if (template && template.includes(IMPORT_TAG) && template.includes(SERVICE_TAG)) {
+        await generatePreLoader(src, template.split('\n'));
     } else {
-        log.info('There are no composable functions in the source folder');
+        throw new Error(`Invalid preload.template - missing ${IMPORT_TAG} and ${SERVICE_TAG} tags`);
     }
 }
 

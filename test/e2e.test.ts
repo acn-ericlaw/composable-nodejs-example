@@ -1,7 +1,6 @@
 import { Logger, Utility, AppConfig, Platform, PostOffice, EventEnvelope, 
     AsyncHttpRequest, MultiLevelMap, ObjectStreamReader, ObjectStreamWriter, ObjectStreamIO } from 'mercury-composable';
-// main application will automatically start when imported
-import '../src/composable-example';
+import { ComposableLoader } from '../src/preload/preload';
 
 const log = Logger.getInstance();
 const util = new Utility();
@@ -17,16 +16,15 @@ let targetHost: string;
 describe('End-to-end tests', () => {
 
     beforeAll(async () => {
+        await ComposableLoader.initialize(8305, true);
         const config = AppConfig.getInstance();
-        const port = config.get('server.port');
+        const port = config.getProperty("server.port");
         targetHost = `http://127.0.0.1:${port}`;
-        log.info(`Begin end-to-end tests with port ${port}`);
-        await Platform.getInstance().getReady();
+        log.info(`End-to-end tests will use ${targetHost}`);
     });
 
     afterAll(async () => {
-        const platform = Platform.getInstance();
-        await platform.stop();
+        await Platform.getInstance().stop();
         // give console.log a moment to finish
         await util.sleep(2000);
         log.info("End-to-end tests completed");
@@ -35,7 +33,7 @@ describe('End-to-end tests', () => {
     it('can do flows', async () => {
         const po = new PostOffice();
         // create profile
-        const data = JSON.stringify({'id': 200, 'name': 'Peter', 'address': '100 World Blvd', 'telephone': '120-222-0000'});
+        const data = {'id': 200, 'name': 'Peter', 'address': '100 World Blvd', 'telephone': '120-222-0000'};
         const httpRequest1 = new AsyncHttpRequest().setMethod('POST').setTargetHost(targetHost).setUrl('/api/profile')
                                                     .setBody(data).setHeader('content-type', 'application/json');
         const req1 = new EventEnvelope().setTo(ASYNC_HTTP_CLIENT).setBody(httpRequest1.toMap());

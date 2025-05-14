@@ -42,6 +42,6 @@
     }
   },
   "dependencies": {
-    "mercury-composable": "file:../mercury-nodejs"
+    "mercury-composable": "github:Accenture/mercury-nodejs"
   }
 }

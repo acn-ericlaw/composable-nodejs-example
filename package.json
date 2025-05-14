@@ -6,7 +6,6 @@
   "engines": {
     "node": ">= 20.18.1"
   },
-  "author": "Eric Law <eric.law@accenture.com>",
   "license": "Apache-2.0",
   "files": [
     "dist/**/*"
@@ -43,6 +42,6 @@
     }
   },
   "dependencies": {
-    "mercury-composable": "github:Accenture/mercury-nodejs"
+    "mercury-composable": "file:../mercury-nodejs"
   }
 }
